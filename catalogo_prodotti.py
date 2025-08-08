@@ -41,6 +41,20 @@ def salva_prodotto_su_csv(prodotto, file_csv='prodotti.csv'):
             ",".join(prodotto["ubicazioni"])
         ])
 
+# 🗑️ Elimina un prodotto dal CSV
+def elimina_prodotto_da_csv(chiave_da_eliminare, file_csv='prodotti.csv'):
+    prodotti_rimanenti = []
+    with open(file_csv, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row['chiave'] != chiave_da_eliminare:
+                prodotti_rimanenti.append(row)
+
+    with open(file_csv, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=["chiave", "nome", "codice", "colore", "azienda", "vaso", "macchine", "ubicazioni"])
+        writer.writeheader()
+        writer.writerows(prodotti_rimanenti)
+
 # 📁 Carica i prodotti salvati nel dizionario "prodotti"
 prodotti_salvati = carica_catalogo_da_csv()
 prodotti = {prod.get("chiave", f"OBEN{str(i).zfill(3)}"): prod for i, prod in enumerate(prodotti_salvati, start=1)}
@@ -121,7 +135,6 @@ with st.expander("🔄 Aggiorna ubicazioni di un prodotto esistente"):
             if len(nuove_ubicazioni) < 1:
                 st.warning("⚠️ Inserisci almeno una nuova ubicazione.")
             else:
-                # Registra il movimento nel file movimenti.csv
                 with open('movimenti.csv', 'a', newline='', encoding='utf-8') as f_mov:
                     writer_mov = csv.writer(f_mov)
                     if f_mov.tell() == 0:
@@ -133,10 +146,8 @@ with st.expander("🔄 Aggiorna ubicazioni di un prodotto esistente"):
                         pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                     ])
 
-                # Aggiorna il prodotto in memoria
                 prodotto_corrente["ubicazioni"] = nuove_ubicazioni
 
-                # Sovrascrive tutto il CSV con i prodotti aggiornati
                 with open('prodotti.csv', 'w', newline='', encoding='utf-8') as f:
                     writer = csv.writer(f)
                     writer.writerow(["chiave", "nome", "codice", "colore", "azienda", "vaso", "macchine", "ubicazioni"])
@@ -152,3 +163,11 @@ with st.expander("🔄 Aggiorna ubicazioni di un prodotto esistente"):
                             ",".join(prod["ubicazioni"])
                         ])
                 st.success(f"✅ Ubicazioni per {chiave_selezionata} aggiornate con successo e movimento registrato.")
+
+# 🗑️ Elimina un prodotto dal catalogo
+with st.expander("🗑️ Elimina un prodotto dal catalogo"):
+    chiavi_disponibili = list(prodotti.keys())
+    chiave_da_eliminare = st.selectbox("🔢 Seleziona la chiave OBEN da eliminare", chiavi_disponibili)
+
+    conferma = st.checkbox(f"⚠️ Conferma eliminazione di `{chiave_da_eliminare}`")
+
