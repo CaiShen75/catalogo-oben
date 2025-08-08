@@ -77,8 +77,8 @@ with st.expander("➕ Aggiungi nuovo prodotto al catalogo (CSV)"):
         else:
             macchine = [int(m.strip()) for m in macchine_str.split(",") if m.strip().isdigit()]
             ubicazioni = [u.strip() for u in ubicazioni_str.split(",") if u.strip()]
-            if len(ubicazioni) != 6:
-                st.warning("⚠️ Inserisci esattamente sei ubicazioni.")
+            if len(ubicazioni) < 1:
+                st.warning("⚠️ Inserisci almeno una ubicazione.")
             elif not macchine:
                 st.warning("⚠️ Inserisci almeno una macchina valida (es. 1,2,3,4).")
             else:
@@ -118,8 +118,8 @@ with st.expander("🔄 Aggiorna ubicazioni di un prodotto esistente"):
 
         if st.button("💾 Aggiorna ubicazioni"):
             nuove_ubicazioni = [u.strip() for u in nuove_ubicazioni_str.split(",") if u.strip()]
-            if len(nuove_ubicazioni) != 6:
-                st.warning("⚠️ Inserisci esattamente sei ubicazioni.")
+            if len(nuove_ubicazioni) < 1:
+                st.warning("⚠️ Inserisci almeno una nuova ubicazione.")
             else:
                 # Registra il movimento nel file movimenti.csv
                 with open('movimenti.csv', 'a', newline='', encoding='utf-8') as f_mov:
