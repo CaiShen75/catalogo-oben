@@ -3,6 +3,29 @@ import pandas as pd
 import csv
 import os
 
+# 📁 Gestione della sessione persistente
+SESSION_FILE = "session.txt"
+
+def salva_sessione(utente_id):
+    with open(SESSION_FILE, "w") as f:
+        f.write(utente_id)
+
+def carica_sessione():
+    if os.path.exists(SESSION_FILE):
+        with open(SESSION_FILE, "r") as f:
+            return f.read().strip()
+    return None
+
+# 🔄 Recuperar sesión al iniciar
+if "logged_in" not in st.session_state:
+    utente_id = carica_sessione()
+    if utente_id:
+        st.session_state.logged_in = True
+        st.session_state.utente_id = utente_id
+    else:
+        st.session_state.logged_in = False
+
+
 # 🔐 Utenti con password fisse stile OBxxxx
 utenti = {
     "1001": {"password": "OB4729", "ruolo": "admin"},
@@ -25,13 +48,19 @@ password_input = st.text_input("🔑 Password", type="password")
 if st.button("Accedi"):
     user_data = utenti.get(utente_input)
     if user_data and user_data["password"] == password_input:
+        # ✅ Guardar datos en session_state
         st.session_state.utente = utente_input
         st.session_state.accesso_autorizzato = True
         st.session_state.ruolo = user_data["ruolo"]
+        st.session_state.logged_in = True
+        st.session_state.utente_id = utente_input
+
+        # 💾 Guardar sesión persistente
+        salva_sessione(utente_input)
+
         st.success(f"✅ Accesso come {user_data['ruolo'].upper()}")
     else:
         st.error("❌ Credenziali non valide.")
-
 
 # 📥 Carica prodotti da CSV
 def carica_catalogo_da_csv(file_csv='prodotti.csv'):
